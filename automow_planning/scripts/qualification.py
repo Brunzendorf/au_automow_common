@@ -4,7 +4,9 @@
 This ROS node is responsible for executing a qualification run.
 """
 
-import roslib; roslib.load_manifest('automow_planning')
+import roslib;
+
+roslib.load_manifest('automow_planning')
 import rospy
 import tf
 from tf.transformations import quaternion_from_euler as qfe
@@ -19,15 +21,17 @@ from visualization_msgs.msg import Marker, MarkerArray
 from nav_msgs.msg import Path, Odometry
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from std_srvs.srv import Empty
-from automow_node.srv import Cutters
+# from automow_node.srv import Cutters
 
 import shapely.geometry as geo
+
 
 class PathPlannerNode(object):
     """
     This is a ROS node that is responsible for planning and executing
     the a path through the field.
     """
+
     def __init__(self):
         # Setup ROS node
         rospy.init_node('path_planner')
@@ -54,7 +58,8 @@ class PathPlannerNode(object):
         Executes a qualification run.
         """
         for waypoint in self.path:
-            if rospy.is_shutdown(): return
+            if rospy.is_shutdown():
+                return
             # Cancel any current goals
             self.move_base_client.cancel_all_goals()
             # Push the goal to the actionlib server
@@ -74,10 +79,11 @@ class PathPlannerNode(object):
             rospy.loginfo("Sending waypoint (%f, %f)@%f" % tuple(waypoint))
             self.move_base_client.send_goal(destination)
             # Wait for the goal to finish
-            duration = rospy.Duration(1.0)
+            duration = rospy.Duration(1)
             for x in range(60):
                 self.move_base_client.wait_for_result(duration)
-                if rospy.is_shutdown(): return
+                if rospy.is_shutdown():
+                    return
 
     def odom_callback(self, msg):
         """
@@ -94,12 +100,12 @@ class PathPlannerNode(object):
         for index, waypoint in enumerate(path):
             new_path.append(list(path[index]))
             # If the end, copy the previous heading
-            if index == len(path)-1:
-                new_path[index].append(new_path[index-1][2])
+            if index == len(path) - 1:
+                new_path[index].append(new_path[index - 1][2])
                 continue
             # Calculate the angle between this waypoint and the next
-            dx = path[index+1][0] - path[index][0]
-            dy = path[index+1][1] - path[index][1]
+            dx = path[index + 1][0] - path[index][0]
+            dy = path[index + 1][1] - path[index][1]
             from math import atan2, pi
             heading = atan2(dy, dx)
             new_path[index].append(heading)
@@ -109,9 +115,9 @@ class PathPlannerNode(object):
         """
         Uses the robot's current position to plan a path.
         """
-        self.listener.waitForTransform("odom", "base_footprint", rospy.Time(), rospy.Duration(10.0))
+        self.listener.waitForTransform("odom", "base_footprint", rospy.Time(), rospy.Duration(10))
         path = []
-        indecies = [(0,0), (5,0), (5,5), (0,5), (0,0)]
+        indecies = [(0, 0), (5, 0), (5, 5), (0, 5), (0, 0)]
         now = rospy.Time.now()
         for i, j in indecies:
             ps = PointStamped()
@@ -142,13 +148,14 @@ class PathPlannerNode(object):
         connected_to_move_base = False
         dur = rospy.Duration(1.0)
         # Wait for the robot position
-        while self.robot_pose == None:
+        while self.robot_pose is None:
             # Check to make sure ROS is ok still
-            if rospy.is_shutdown(): return
+            if rospy.is_shutdown():
+                return
             # Print message about the waiting
             msg = "Qualification: waiting on initial robot pose."
             rospy.loginfo(msg)
-            rospy.Rate(1.0).sleep()
+            rospy.Rate(1).sleep()
         # Now we should plan a path
         self.plan_path()
         rospy.loginfo("Qualification: path planning complete.")
@@ -163,6 +170,7 @@ class PathPlannerNode(object):
             rospy.loginfo(msg)
         # Now we are ready to start feeding move_base waypoints
         return
+
 
 if __name__ == '__main__':
     ppn = PathPlannerNode()

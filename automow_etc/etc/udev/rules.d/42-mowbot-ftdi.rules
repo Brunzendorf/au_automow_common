@@ -1,6 +1,0 @@
-# udevadm info --attribute-walk -n /dev/ttyUSB?
-SUBSYSTEM=="tty", ATTRS{idVendor}=="199b", ATTRS{idProduct}=="3065", ATTRS{serial}=="6223.04500______", SYMLINK+="ahrs"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="15d1", ATTRS{idProduct}=="0000", ATTRS{product}=="URG-Series USB Driver", SYMLINK+="laser"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="FTE3Q38X", SYMLINK+="motor_controller"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="FTTFRD5Z", SYMLINK+="power_control"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="FTSYWNRA", SYMLINK+="gps"

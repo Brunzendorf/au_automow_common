@@ -1,5 +1,3 @@
-bool cutter_1
-bool cutter_2
+bool cutter
 ----
-bool cutter_1
-bool cutter_2
+bool cutter

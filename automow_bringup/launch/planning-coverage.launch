@@ -1,0 +1,40 @@
+<launch>
+
+    <!--cutter-->
+    <arg name="cutter_frame_id" default="/cutter"/>
+    <arg name="cutter_radius" default="0.1778"/>
+    <arg name="resolution" default="0.05"/>
+    <arg name="check_rate" default="20"/>
+    <arg name="publish_rate" default="1.0"/>
+
+    <!--field publisher-->
+    <arg name="field_file" default="$(find automow_maps)/maps/competition_practice.yaml" />
+    <arg name="field_frame_id" default="odom_combined"/>
+    <arg name="safety_zone_offset" default="1.0"/>
+    <arg name="cut_area_offset" default="-0.5"/>
+
+    <!--path planning node-->
+    <arg name="cut_spacing" default="0.5"/>
+
+    <node pkg="tf" type="static_transform_publisher" name="base_link_2_cutter"
+          args="0 0 0.075 0 0 0 /base_link /cutter 100"/>
+
+    <!-- Launch the field_publisher -->
+    <include file="$(find automow_maps)/launch/field_publisher.launch" />
+
+    <!-- Launch the path planning node -->
+    <include file="$(find automow_planning)/launch/path_planning.launch">
+        <arg name="cut_spacing" value="$(arg cut_spacing)" />
+
+    </include>
+    <!-- Include the cutter control and coverage tracking -->
+    <include file="$(find automow_planning)/launch/cutter_control.launch" />
+
+
+    <!--<node pkg="rosserial_python" type="serial_node.py" name="automow_pcb">-->
+        <!--<param name="port" value="/dev/power_control"/>-->
+    <!--</node>-->
+
+    <node pkg="automow_node" type="diagnostics.py" name="robot_diag"/>
+
+</launch>

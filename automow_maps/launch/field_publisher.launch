@@ -1,11 +1,14 @@
 <launch>
-	<arg name="field_file"
-		 default="$(find automow_maps)/maps/competition_practice.yaml" />
+	<arg name="field_file" default="$(find automow_maps)/maps/competition_practice.yaml" />
+    <arg name="field_frame_id" default="odom_combined"/>
+    <arg name="safety_zone_offset" default="1.0"/>
+    <arg name="cut_area_offset" default="-0.5"/>
 
     <node pkg="automow_maps" type="field_publisher.py" name="field_publisher"
           output="screen" >
-        <rosparam command="load" param="field_polygon"
-        		  file="$(arg field_file)" />
-        <param name="field_frame_id" value="odom" />
+        <rosparam command="load" param="field_polygon" file="$(arg field_file)" />
+        <param name="field_frame_id" value="$(arg field_frame_id)" />
+        <param name="safety_zone_offset" value="$(arg safety_zone_offset)" />
+        <param name="cut_area_offset" value="$(arg cut_area_offset)" />
     </node>
 </launch>

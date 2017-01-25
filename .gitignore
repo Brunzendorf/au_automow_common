@@ -24,3 +24,5 @@ wiped
 msg_gen
 srv_gen
 *.cfgc
+Würde automow_maps/hCMakeLists.txt löschen
+Würde cmake-build-debug/ löschen

@@ -1,13 +1,11 @@
 <launch>
-	<!-- Launch the field_publisher -->
-	<include file="$(find automow_maps)/launch/field_publisher.launch" />
-	<!-- Launch the path planning node -->
+	<arg name="cut_spacing" default="-0.5"/>
+
 	<node pkg="automow_planning" type="path_planner.py" name="path_planner"
 		  output="screen">
 		<!-- Spacing between cut lines in meters -->
-		<param name="cut_spacing" type="double" value="0.5" />
-		<remap from="odom" to="ekf/odom"/>
+		<param name="cut_spacing" type="double" value="$(arg cut_spacing)" />
+		<remap from="odom" to="robot_pose_ekf/odom_combined"/>
 	</node>
-	<!-- Include the cutter control and coverage tracking -->
-	<include file="$(find automow_planning)/launch/cutter_control.launch" />
+
 </launch>

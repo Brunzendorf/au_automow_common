@@ -1,3 +1,0 @@
-apps:
- - display: PS3 Joystick
-   app: automow_teleop/ps3_teleop

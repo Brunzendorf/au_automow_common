@@ -19,37 +19,39 @@ blades are on.  It publishes this information as a nav_msgs/GridCells msg to
 be visualized in rViz.
 """
 
-import roslib; roslib.load_manifest('automow_planning')
+import roslib;
+
+roslib.load_manifest('automow_planning')
 import rospy
 import tf
 
+from tf.listener import TransformListener
 from geometry_msgs.msg import PolygonStamped, Point
 from nav_msgs.msg import GridCells
 from automow_node.srv import Cutters
 from automow_planning.maptools import image2array
-
 import shapely.geometry as geo
+
 
 class CutterControlNode(object):
     """
     This is a ROS node that is 
     responsible for controlling the cutters
     """
+
     def __init__(self):
         # Setup ROS node
         rospy.init_node('cutter_control')
 
         # ROS params
-        self.left_cutter_frame_id = \
-            rospy.get_param("~left_cutter_frame_id", "left_cutter")
-        self.right_cutter_frame_id = \
-            rospy.get_param("~right_cutter_frame_id", "right_cutter")
-        self.cutter_radius = rospy.get_param("~cutter_radius", 0.3556/2.0)
+        self.cutter_frame_id = \
+            rospy.get_param("~cutter_frame_id", "cutter")
+        self.cutter_radius = rospy.get_param("~cutter_radius", 0.3556 / 2.0)
         check_rate = rospy.Rate(rospy.get_param("~check_rate", 20.0))
 
         # Setup publishers and subscribers
-        rospy.Subscriber('/field/boundry', PolygonStamped, self.field_callback)
-        self.listener = tf.TransformListener()
+        rospy.Subscriber('/field/boundry', PolygonStamped, self.field_callback, queue_size=10)
+        self.listener = TransformListener()
 
         # Setup ROS service
         set_cutter_states = rospy.ServiceProxy('cutters', Cutters)
@@ -61,9 +63,8 @@ class CutterControlNode(object):
         self.right_cutter_state = False
 
         # Set the initial cutter status to False
-        set_cutter_states(False, False)
-        self.current_left_state = False
-        self.current_right_state = False
+        set_cutter_states(False)
+        self.current_state = False
 
         # Spin
         while not rospy.is_shutdown():
@@ -92,7 +93,7 @@ class CutterControlNode(object):
         # Convert the PolygonStamped into a shapely polygon
         temp_points = []
         for point in msg.polygon.points:
-            temp_points.append( (float(point.x), float(point.y)) )
+            temp_points.append((float(point.x), float(point.y)))
         self.field_shape = geo.Polygon(temp_points)
         self.field_frame_id = msg.header.frame_id
 
@@ -117,7 +118,7 @@ class CutterControlNode(object):
         # Calculate the intersection of the cutter and field shapes
         intersection = self.field_shape.intersection(cutter)
         # Calculate the ratio of the intersection's area to the cutter's area
-        area_ratio = intersection.area/cutter.area
+        area_ratio = intersection.area / cutter.area
         # If the ratio is not 1.0 then part of the cutter 
         # is outside of the field, so turn off the blades
         if area_ratio != 1.0:
@@ -132,20 +133,17 @@ class CutterControlNode(object):
         in the field polygon.
         """
         # Gate to prevent this when the field_shape has not been received
-        if self.field_shape == None or self.field_frame_id == None:
-            return (False, False)
-        # Get the left cutter
-        left_cutter = self.get_cutter_shape(self.field_frame_id,
-                                       self.left_cutter_frame_id)
-        # Get the right cutter
-        right_cutter = self.get_cutter_shape(self.field_frame_id,
-                                        self.right_cutter_frame_id)
+        if self.field_shape is None or self.field_frame_id is None:
+            return False
+        # Get the cutter
+        cutter = self.get_cutter_shape(self.field_frame_id,
+                                       self.cutter_frame_id)
+
         # Check to see if the left cutter is in the field polygon
-        left_cutter_state = self.is_cutter_in_field(left_cutter)
-        # Check to see if the right cutter is in the field polygon
-        right_cutter_state = self.is_cutter_in_field(right_cutter)
+        cutter_state = self.is_cutter_in_field(cutter)
         # Return the new states
-        return (left_cutter_state, right_cutter_state)
+        return cutter_state
+
 
 if __name__ == '__main__':
     ccn = CutterControlNode()

@@ -1,28 +1,31 @@
 <launch>
+
+    <arg name="cutter_frame_id" default="cutter"/>
+    <arg name="cutter_radius" default="0.1778"/>
+    <arg name="resolution" default="0.05"/>
+    <arg name="check_rate" default="20"/>
+    <arg name="publish_rate" default="1.0"/>
+
     <node pkg="automow_planning" type="cutter_control.py" name="cutter_control"
           output="screen">
-        <!-- Frame id of the left cutter -->
-        <param name="left_cutter_frame_id" value="left_cutter" />
-        <!-- Frame id of the right cutter -->
-        <param name="right_cutter_frame_id" value="right_cutter" />
+        <!-- Frame id of cutter -->
+        <param name="cutter_frame_id" value="$(arg cutter_frame_id)" />
         <!-- Radius of the cutting blades in meters -->
-        <param name="cutter_radius" type="double" value="0.1778" />
+        <param name="cutter_radius" type="double" value="$(arg cutter_radius)" />
         <!-- Rate at which the cutter positions will be checked -->
-        <param name="check_rate" type="double" value="20.0" />
+        <param name="check_rate" type="double" value="$(arg check_rate)" />
     </node>
     <node pkg="automow_planning" type="cutting_coverage.py" name="cutting_coverge"
           output="screen">
-        <!-- Frame id of the left cutter -->
-        <param name="left_cutter_frame_id" value="left_cutter" />
-        <!-- Frame id of the right cutter -->
-        <param name="right_cutter_frame_id" value="right_cutter" />
+        <!-- Frame id of the cutter -->
+        <param name="cutter_frame_id" value="$(arg cutter_frame_id)" />
         <!-- Radius of the cutting blades in meters -->
-        <param name="cutter_radius" type="double" value="0.1778" />
+        <param name="cutter_radius" type="double" value="$(arg cutter_radius)" />
         <!-- Resolution of the coverage map in meters -->
-        <param name="resolution" type="double" value="0.05" />
+        <param name="resolution" type="double" value="$(arg resolution)" />
         <!-- Rate at which the coverage will be published -->
-        <param name="publish_rate" type="double" value="1.0" />
+        <param name="publish_rate" type="double" value="$(arg publish_rate)" />
         <!-- Rate at which the cutter positions will be checked -->
-        <param name="check_rate" type="double" value="20.0" />
+        <param name="check_rate" type="double" value="$(arg check_rate)" />
     </node>
 </launch>
