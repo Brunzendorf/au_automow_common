@@ -45,7 +45,7 @@ class FieldPublisherNode(object):
         self.field_polygon = rospy.get_param("~field_polygon")
         self.safety_zone_offset = rospy.get_param("~safety_zone_offset", 1)
         self.cut_area_offset = rospy.get_param("~cut_area_offset", -0.5)
-        self.field_frame_id = rospy.get_param("~field_frame_id", "odom_combined")
+        self.field_frame_id = rospy.get_param("~field_frame_id", "map")
 
         # Setup publishers and subscribers
         safety_pub = rospy.Publisher('/field/safety', PolygonStamped, latch=True, queue_size=10)
@@ -76,10 +76,10 @@ class FieldPublisherNode(object):
         point_count = 0
         for point in self.field_polygon:
             point_count += 1
-            if point['fix_type'] < 3:
-                rospy.logwarn('Point %i has a low quality fix type of %i'
-                              % (point_count, point['fix_type']))
-            (easting, northing) = (point['easting'], point['northing'])
+            # if point['fix_type'] < 3:
+            #     rospy.logwarn('Point %i has a low quality fix type of %i'
+            #                   % (point_count, point['fix_type']))
+            (easting, northing) = (point['xpose'], point['ypose'])
             polygon_points.append((float(easting), float(northing)))
             polygon_points32.append(Point32(float(easting), float(northing), 0))
         # Put the points into the boundry_msg

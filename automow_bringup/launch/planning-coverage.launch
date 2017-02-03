@@ -30,11 +30,6 @@
     <!-- Include the cutter control and coverage tracking -->
     <include file="$(find automow_planning)/launch/cutter_control.launch" />
 
-
-    <!--<node pkg="rosserial_python" type="serial_node.py" name="automow_pcb">-->
-        <!--<param name="port" value="/dev/power_control"/>-->
-    <!--</node>-->
-
     <node pkg="automow_node" type="diagnostics.py" name="robot_diag"/>
 
 </launch>
