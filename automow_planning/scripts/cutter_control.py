@@ -45,7 +45,7 @@ class CutterControlNode(object):
 
         # ROS params
         self.cutter_frame_id = \
-            rospy.get_param("~cutter_frame_id", "cutter")
+            rospy.get_param("~cutter_frame_id", "/cutter")
         self.cutter_radius = rospy.get_param("~cutter_radius", 0.3556 / 2.0)
         check_rate = rospy.Rate(rospy.get_param("~check_rate", 20.0))
 
@@ -58,14 +58,13 @@ class CutterControlNode(object):
         self.field_shape = None
         self.field_frame_id = None
         self.cutter_state = False
+        self.current_state = False
 
         msg = Bool
-
         msg.data = self.current_state
 
         # Set the initial cutter status to False
         set_cutter_states_pub.publish(msg)
-        self.current_state = False
 
         # Spin
         while not rospy.is_shutdown():
@@ -103,8 +102,8 @@ class CutterControlNode(object):
         Returns a cutter shape given the field frame and the cutter frame.
         """
         # Get the position of the cutter in the field frame
-        (translation, rotation) = self.listener.lookupTransform(field_frame,
-                                                                cutter_frame,
+        (translation, rotation) = self.listener.lookupTransform('/map',
+                                                                '/cutter',
                                                                 rospy.Time(0))
         # Create a point at the frame location
         cutter = geo.Point([translation[0], translation[1]])

@@ -4,7 +4,9 @@
 This module contains code to plan coverage paths
 """
 import functools
+from functools import cmp_to_key
 
+from __builtin__ import cmp
 from shapely.geometry import Point, Polygon, LineString
 from shapely.geometry import MultiLineString, MultiPoint
 from shapely.geometry import GeometryCollection
@@ -44,7 +46,7 @@ def generate_intersections(poly, width):
 def sort_to(point, list_in):
     """Sorts a set of points by distance to a point"""
     l = deepcopy(list_in)
-    l.sort(lambda x, y: functools.cmp_to_key(x.distance(Point(*point)),
+    l.sort(lambda x, y: cmp(x.distance(Point(*point)),
                                              y.distance(Point(*point))))
     return l
 
@@ -52,7 +54,7 @@ def sort_to(point, list_in):
 def get_furthest(ps, origin_in):
     """Get a point along a line furthest away from a given point"""
     orig_point = Point(*origin_in)
-    return sorted(ps, lambda x, y: functools.cmp_to_key(orig_point.distance(Point(*x)),
+    return sorted(ps, lambda x, y: cmp(orig_point.distance(Point(*x)),
                                                         orig_point.distance(Point(*y))))
 
 
@@ -136,4 +138,4 @@ if __name__ == '__main__':
     import pylab;
 
     pylab.show()
-import numpy as np
+

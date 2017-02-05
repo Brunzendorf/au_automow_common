@@ -44,11 +44,7 @@ class PathPlannerNode(object):
         self.cut_spacing = rospy.get_param("~cut_spacing", 0.25)
 
         # Setup publishers and subscribers
-        rospy.Subscriber('/field/cut_area', PolygonStamped, self.field_callback, queue_size=10)
-        self.path_marker_pub = rospy.Publisher('visualization_marker',
-                                               MarkerArray,
-                                               latch=True)
-        rospy.Subscriber('/odom', PoseWithCovarianceStamped, self.odom_callback)
+
 
         # Setup initial variables
         self.field_shape = None
@@ -66,6 +62,11 @@ class PathPlannerNode(object):
         self.clear_costmaps = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
         self.just_reset = False
 
+        rospy.Subscriber('/field/cut_area', PolygonStamped, self.field_callback, queue_size=1)
+        self.path_marker_pub = rospy.Publisher('visualization_marker',
+                                               MarkerArray,
+                                               latch=True, queue_size=10)
+        rospy.Subscriber('/odom', PoseWithCovarianceStamped, self.odom_callback, queue_size=10)
         # Spin until shutdown or we are ready for path following
         rate = rospy.Rate(10)
         while not rospy.is_shutdown() and not self.start_path_following:
@@ -74,7 +75,7 @@ class PathPlannerNode(object):
         if rospy.is_shutdown():
             return
         # Run until stopped
-        heading = 0
+        heading = 90
         while not rospy.is_shutdown():
             # Setup path following
             self.setup_path_following(heading)
@@ -123,6 +124,7 @@ class PathPlannerNode(object):
         # Rotate the field polygon
         from automow_planning.maptools import rotate_polygon_to
         transformed_field_polygon = rotate_polygon_to(field_polygon, rotation)
+
         # Decompose the rotated field into a series of waypoints
         from automow_planning.coverage import decompose
 
@@ -134,6 +136,8 @@ class PathPlannerNode(object):
         transformed_path = decompose(transformed_field_polygon,
                                      origin=(origin[0], origin[1]),
                                      width=self.cut_spacing)
+
+
         # Rotate the transformed path back into the source frame
         from automow_planning.maptools import rotate_from
         self.path = rotate_from(np.array(transformed_path), rotation)

@@ -45,16 +45,17 @@ class FieldPublisherNode(object):
         self.field_polygon = rospy.get_param("~field_polygon")
         self.safety_zone_offset = rospy.get_param("~safety_zone_offset", 1)
         self.cut_area_offset = rospy.get_param("~cut_area_offset", -0.5)
-        self.field_frame_id = rospy.get_param("~field_frame_id", "map")
+        self.field_frame_id = rospy.get_param("~field_frame_id", "/map")
 
         # Setup publishers and subscribers
-        safety_pub = rospy.Publisher('/field/safety', PolygonStamped, latch=True, queue_size=10)
-        boundry_pub = rospy.Publisher('/field/boundry', PolygonStamped, latch=True, queue_size=10)
-        cut_area_pub = rospy.Publisher('/field/cut_area', PolygonStamped, latch=True, queue_size=10)
+        safety_pub = rospy.Publisher('/field/safety', PolygonStamped, latch=True, queue_size=1)
+        boundry_pub = rospy.Publisher('/field/boundry', PolygonStamped, latch=True, queue_size=1)
+        cut_area_pub = rospy.Publisher('/field/cut_area', PolygonStamped, latch=True, queue_size=1)
 
         # Read the field in
         if self.read_field_file():
             # Publish the msg once, it is latched so no need to repeat
+
             safety_pub.publish(self.safety_msg)
             boundry_pub.publish(self.boundry_msg)
             cut_area_pub.publish(self.cut_area_msg)

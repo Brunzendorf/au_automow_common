@@ -52,9 +52,9 @@ class CuttingCoverage(object):
         self.grid_cells_lock = Lock()
 
         # Setup publishers and subscribers
-        rospy.Subscriber('/field/safety', PolygonStamped, self.field_callback)
-        rospy.Subscriber('/robot/status', Status, self.on_status)
-        self.grid_cells_pub = rospy.Publisher('/cutter_coverage', GridCells, latch=True)
+        rospy.Subscriber('/field/safety', PolygonStamped, self.field_callback, queue_size=1)
+        # rospy.Subscriber('/robot/status', Status, self.on_status)
+        self.grid_cells_pub = rospy.Publisher('/cutter_coverage', GridCells, latch=True, queue_size=10)
 
         # Wait for the field shape
         while self.field_shape is None:
