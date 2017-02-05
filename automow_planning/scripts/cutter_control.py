@@ -28,7 +28,7 @@ import tf
 from tf.listener import TransformListener
 from geometry_msgs.msg import PolygonStamped, Point
 from nav_msgs.msg import GridCells
-from automow_node.srv import Cutters
+from std_msgs.msg import Bool
 from automow_planning.maptools import image2array
 import shapely.geometry as geo
 
@@ -52,18 +52,19 @@ class CutterControlNode(object):
         # Setup publishers and subscribers
         rospy.Subscriber('/field/boundry', PolygonStamped, self.field_callback, queue_size=10)
         self.listener = TransformListener()
-
-        # Setup ROS service
-        set_cutter_states = rospy.ServiceProxy('cutters', Cutters)
+        set_cutter_states_pub = rospy.Publisher('cutters', Bool)
 
         # Setup initial variables
         self.field_shape = None
         self.field_frame_id = None
-        self.left_cutter_state = False
-        self.right_cutter_state = False
+        self.cutter_state = False
+
+        msg = Bool
+
+        msg.data = self.current_state
 
         # Set the initial cutter status to False
-        set_cutter_states(False)
+        set_cutter_states_pub.publish(msg)
         self.current_state = False
 
         # Spin
@@ -73,11 +74,11 @@ class CutterControlNode(object):
                           rospy.ServiceException)
             try:
                 # Update the proper cutter states
-                left_state, right_state = self.check_cutters()
-                if self.current_left_state != left_state or self.current_right_state != right_state:
-                    set_cutter_states(left_state, right_state)
-                self.current_left_state = left_state
-                self.current_right_state = right_state
+                state = self.check_cutters()
+                if self.cutter_state != state:
+                    msg.data = state
+                    set_cutter_states_pub.publish(msg)
+                self.cutter_state = state
             except tf.ExtrapolationException as e:
                 continue
             except exceptions as e:

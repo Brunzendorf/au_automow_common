@@ -10,9 +10,7 @@ Once the path has been generated the node can, by configuration or
 a service call, start feeding path waypoints as actionlib goals to move base.
 """
 
-import roslib;
-
-roslib.load_manifest('automow_planning')
+import roslib;roslib.load_manifest('automow_planning')
 import rospy
 # import shapely  as geo
 import numpy as np
@@ -23,10 +21,10 @@ from actionlib import SimpleActionClient
 
 from math import radians
 
-from geometry_msgs.msg import PolygonStamped, Point, PoseStamped
+from geometry_msgs.msg import PolygonStamped, Point, PoseStamped, PoseWithCovarianceStamped
 from std_msgs.msg import ColorRGBA
 from visualization_msgs.msg import Marker, MarkerArray
-from nav_msgs.msg import Path, Odometry
+from nav_msgs.msg import Path
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from std_srvs.srv import Empty
 
@@ -50,7 +48,7 @@ class PathPlannerNode(object):
         self.path_marker_pub = rospy.Publisher('visualization_marker',
                                                MarkerArray,
                                                latch=True)
-        rospy.Subscriber('/odom', PoseWiovarianyStathC, self.odom_callback)
+        rospy.Subscriber('/odom', PoseWithCovarianceStamped, self.odom_callback)
 
         # Setup initial variables
         self.field_shape = None
@@ -296,7 +294,7 @@ class PathPlannerNode(object):
         dur = rospy.Duration(1)
         # If testing prime the robot_pose
         if self.testing:
-            self.robot_pose = Odometry()
+            self.robot_pose = PoseWithCovarianceStamped()
             self.robot_pose.pose.pose.position.x = 0
             self.robot_pose.pose.pose.position.y = 0
         # Wait for the field shape

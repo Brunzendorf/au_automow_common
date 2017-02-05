@@ -2,6 +2,7 @@
 
     <!--cutter-->
     <arg name="cutter_frame_id" default="/cutter"/>
+    <arg name="base_frame_id" default="/base_link"/>
     <arg name="cutter_radius" default="0.1778"/>
     <arg name="resolution" default="0.05"/>
     <arg name="check_rate" default="20"/>
@@ -9,26 +10,32 @@
 
     <!--field publisher-->
     <arg name="field_file" default="$(find automow_maps)/maps/competition_practice.yaml" />
-    <arg name="field_frame_id" default="odom_combined"/>
-    <arg name="safety_zone_offset" default="1.0"/>
-    <arg name="cut_area_offset" default="-0.5"/>
+    <arg name="field_frame_id" default="map"/>
+    <arg name="safety_zone_offset" default="0.3"/>
+    <arg name="cut_area_offset" default="-0.2"/>
 
     <!--path planning node-->
     <arg name="cut_spacing" default="0.5"/>
 
     <node pkg="tf" type="static_transform_publisher" name="base_link_2_cutter"
-          args="0 0 0.075 0 0 0 /base_link /cutter 100"/>
+          args="0 0 -0.075 0 0 0 $(arg base_frame_id) $(arg cutter_frame_id) 100"/>
 
     <!-- Launch the field_publisher -->
-    <include file="$(find automow_maps)/launch/field_publisher.launch" />
+    <include file="$(find automow_maps)/launch/field_publisher.launch">
+        <arg name="field_file" value="$(arg field_file)" />
+        <arg name="field_frame_id" value="$(arg field_frame_id)"/>
+        <arg name="safety_zone_offset" value="$(arg safety_zone_offset)" />
+        <arg name="cut_area_offset" value="$(arg cut_area_offset)" />
+    </include>
 
     <!-- Launch the path planning node -->
     <include file="$(find automow_planning)/launch/path_planning.launch">
         <arg name="cut_spacing" value="$(arg cut_spacing)" />
-
     </include>
+
     <!-- Include the cutter control and coverage tracking -->
-    <include file="$(find automow_planning)/launch/cutter_control.launch" />
+    <include file="$(find automow_planning)/launch/cutter_control.launch" >
+    </include>
 
     <node pkg="automow_node" type="diagnostics.py" name="robot_diag"/>
 
